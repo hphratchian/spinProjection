@@ -1,4 +1,4 @@
-      module hphSpinFun_mod
+      module spinprojection_mod
 !
 !     This module supports the program scfEnergyTerms.
 !
@@ -397,10 +397,10 @@
 !
 !=====================================================================
 !
-!     PROCEDURE S2_MAT_ELEM    
+!     PROCEDURE S2_Mat_Element_NEW
 ! 
-      Function S2_Mat_Elem(IOut,IPrint,NBasis,Alpha_String_1,Beta_String_1, &
-      Alpha_String_2,Beta_String_2,MO_Overlap,nBit_IntsIn)
+      Function S2_Mat_Element_NEW(IOut,IPrint,NBasis,Alpha_String_1,Beta_String_1, &
+        Alpha_String_2,Beta_String_2,MO_Overlap,nBit_IntsIn)
 !
 !     This function returns the CI S**2 matrix elements used for computing S**2
 !     values of CI vectors for a given alpha and beta string combination.
@@ -413,7 +413,7 @@
       Integer(kind=int64)::IOut,IPrint,NBasis,IPos,JPos,IDiff,Det_Diff,NAlpha,NBeta, &
         IOcc,JOcc,KOcc,LOcc,Mat_Sign,Alpha_Diff_Cnt,Beta_Diff_Cnt,NBit_Ints, &
         I,J,II,JJ
-      real(kind=real64)::S2_Mat_Elem,Zero=0.0d0,Quarter=0.25d0,ABTerm,One=1.0d0
+      real(kind=real64)::S2_Mat_Element_NEW,Zero=0.0d0,Quarter=0.25d0,ABTerm,One=1.0d0
       Integer(kind=int64),Dimension(4)::Orbs,Spin,Det
       Integer(kind=int64),Dimension(:)::Alpha_String_1,Alpha_String_2,Beta_String_1, &
         Beta_String_2
@@ -466,14 +466,14 @@
       Det_Diff = Alpha_Diff_Cnt/2 + Beta_Diff_Cnt/2
 
       If(Mod(Alpha_Diff_Cnt,2).ne.0.or.Mod(Beta_Diff_Cnt,2).ne.0) then
-        Write(IOut,*) "ERROR: S2_Mat_Elem has been handed spin non-conserving &
+        Write(IOut,*) "ERROR: S2_Mat_Element_NEW has been handed spin non-conserving &
         determinants"
         Call Exit()
       EndIf
       Select Case (Det_Diff)
 !
         Case(3:)
-          S2_Mat_Elem = Zero 
+          S2_Mat_Element_NEW = Zero 
           Return
 !
         Case(2)
@@ -592,74 +592,74 @@
           If(Det(1).eq.Det(2).and.Det(3).eq.Det(4)) then
             If(Spin(1).eq.Spin(3).and.Spin(2).eq.Spin(4)) then
               If(Spin(1).eq.0.and.Spin(2).eq.1) then
-                S2_Mat_Elem = Mat_Sign*MO_Overlap(Orbs(1),Orbs(4)+NBasis)*MO_Overlap(Orbs(2)+NBasis,Orbs(3))
+                S2_Mat_Element_NEW = Mat_Sign*MO_Overlap(Orbs(1),Orbs(4)+NBasis)*MO_Overlap(Orbs(2)+NBasis,Orbs(3))
               ElseIf(Spin(1).eq.1.and.Spin(2).eq.0) then
-                S2_Mat_Elem = Mat_Sign*MO_Overlap(Orbs(2),Orbs(3)+NBasis)*MO_Overlap(Orbs(1)+NBasis,Orbs(4))
+                S2_Mat_Element_NEW = Mat_Sign*MO_Overlap(Orbs(2),Orbs(3)+NBasis)*MO_Overlap(Orbs(1)+NBasis,Orbs(4))
               Else
 !             Setting anything that isn't alpha-beta --> alpha-beta excitations to zero
-                S2_Mat_Elem = Zero
+                S2_Mat_Element_NEW = Zero
               EndIf
             ElseIf(Spin(1).eq.Spin(4).and.Spin(2).eq.Spin(3)) then
               If(Spin(1).eq.0.and.Spin(2).eq.1) then
-                S2_Mat_Elem = Mat_Sign*MO_Overlap(Orbs(1),Orbs(3)+NBasis)*MO_Overlap(Orbs(2)+NBasis,Orbs(4))
+                S2_Mat_Element_NEW = Mat_Sign*MO_Overlap(Orbs(1),Orbs(3)+NBasis)*MO_Overlap(Orbs(2)+NBasis,Orbs(4))
               ElseIf(Spin(1).eq.1.and.Spin(2).eq.0) then
-                S2_Mat_Elem = Mat_Sign*MO_Overlap(Orbs(2),Orbs(4)+NBasis)*MO_Overlap(Orbs(1)+NBasis,Orbs(3))
+                S2_Mat_Element_NEW = Mat_Sign*MO_Overlap(Orbs(2),Orbs(4)+NBasis)*MO_Overlap(Orbs(1)+NBasis,Orbs(3))
               Else
 !             Setting anything that isn't alpha-beta --> alpha-beta excitations to zero
-                S2_Mat_Elem = Zero
+                S2_Mat_Element_NEW = Zero
               EndIf
             Else
 !             This suggests that there are unbalanced spins between determinants 
-              S2_Mat_Elem = Zero
+              S2_Mat_Element_NEW = Zero
             EndIf
           ElseIf(Det(1).eq.Det(3).and.Det(2).eq.Det(4)) then
             If(Spin(1).eq.Spin(2).and.Spin(3).eq.Spin(4)) then
               If(Spin(1).eq.0.and.Spin(3).eq.1) then
-                S2_Mat_Elem = Mat_Sign*MO_Overlap(Orbs(1),Orbs(4)+NBasis)*MO_Overlap(Orbs(3)+NBasis,Orbs(2))
+                S2_Mat_Element_NEW = Mat_Sign*MO_Overlap(Orbs(1),Orbs(4)+NBasis)*MO_Overlap(Orbs(3)+NBasis,Orbs(2))
               ElseIf(Spin(1).eq.1.and.Spin(3).eq.0) then
-                S2_Mat_Elem = Mat_Sign*MO_Overlap(Orbs(3),Orbs(2)+NBasis)*MO_Overlap(Orbs(1)+NBasis,Orbs(4))
+                S2_Mat_Element_NEW = Mat_Sign*MO_Overlap(Orbs(3),Orbs(2)+NBasis)*MO_Overlap(Orbs(1)+NBasis,Orbs(4))
               Else
 !             Setting anything that isn't alpha-beta --> alpha-beta excitations to zero
-                S2_Mat_Elem = Zero
+                S2_Mat_Element_NEW = Zero
               EndIf
             ElseIf(Spin(1).eq.Spin(4).and.Spin(2).eq.Spin(3)) then
               If(Spin(1).eq.0.and.Spin(3).eq.1) then
-                S2_Mat_Elem = Mat_Sign*MO_Overlap(Orbs(1),Orbs(2)+NBasis)*MO_Overlap(Orbs(3)+NBasis,Orbs(4))
+                S2_Mat_Element_NEW = Mat_Sign*MO_Overlap(Orbs(1),Orbs(2)+NBasis)*MO_Overlap(Orbs(3)+NBasis,Orbs(4))
               ElseIf(Spin(1).eq.1.and.Spin(3).eq.0) then
-                S2_Mat_Elem = Mat_Sign*MO_Overlap(Orbs(3),Orbs(4)+NBasis)*MO_Overlap(Orbs(1)+NBasis,Orbs(2))
+                S2_Mat_Element_NEW = Mat_Sign*MO_Overlap(Orbs(3),Orbs(4)+NBasis)*MO_Overlap(Orbs(1)+NBasis,Orbs(2))
               Else
 !             Setting anything that isn't alpha-beta --> alpha-beta excitations to zero
-                S2_Mat_Elem = Zero
+                S2_Mat_Element_NEW = Zero
               EndIf
             Else
 !             This suggests that there are unbalanced spins between determinants 
-              S2_Mat_Elem = Zero
+              S2_Mat_Element_NEW = Zero
             EndIf
           ElseIf(Det(1).eq.Det(4).and.Det(2).eq.Det(3)) then
             If(Spin(1).eq.Spin(2).and.Spin(3).eq.Spin(4)) then
               If(Spin(1).eq.0.and.Spin(4).eq.1) then
-                S2_Mat_Elem = Mat_Sign*MO_Overlap(Orbs(1),Orbs(3)+NBasis)*MO_Overlap(Orbs(4)+NBasis,Orbs(2))
+                S2_Mat_Element_NEW = Mat_Sign*MO_Overlap(Orbs(1),Orbs(3)+NBasis)*MO_Overlap(Orbs(4)+NBasis,Orbs(2))
               ElseIf(Spin(1).eq.1.and.Spin(4).eq.0) then
-                S2_Mat_Elem = Mat_Sign*MO_Overlap(Orbs(4),Orbs(2)+NBasis)*MO_Overlap(Orbs(1)+NBasis,Orbs(3))
+                S2_Mat_Element_NEW = Mat_Sign*MO_Overlap(Orbs(4),Orbs(2)+NBasis)*MO_Overlap(Orbs(1)+NBasis,Orbs(3))
               Else
 !             Setting anything that isn't alpha-beta --> alpha-beta excitations to zero
-                S2_Mat_Elem = Zero
+                S2_Mat_Element_NEW = Zero
               EndIf
             ElseIf(Spin(1).eq.Spin(3).and.Spin(2).eq.Spin(4)) then
               If(Spin(1).eq.0.and.Spin(4).eq.1) then
-                S2_Mat_Elem = Mat_Sign*MO_Overlap(Orbs(1),Orbs(2)+NBasis)*MO_Overlap(Orbs(4)+NBasis,Orbs(3))
+                S2_Mat_Element_NEW = Mat_Sign*MO_Overlap(Orbs(1),Orbs(2)+NBasis)*MO_Overlap(Orbs(4)+NBasis,Orbs(3))
               ElseIf(Spin(1).eq.1.and.Spin(4).eq.0) then
-                S2_Mat_Elem = Mat_Sign*MO_Overlap(Orbs(4),Orbs(3)+NBasis)*MO_Overlap(Orbs(1)+NBasis,Orbs(2))
+                S2_Mat_Element_NEW = Mat_Sign*MO_Overlap(Orbs(4),Orbs(3)+NBasis)*MO_Overlap(Orbs(1)+NBasis,Orbs(2))
               Else
 !             Setting anything that isn't alpha-beta --> alpha-beta excitations to zero
-                S2_Mat_Elem = Zero
+                S2_Mat_Element_NEW = Zero
               EndIf
             Else
 !             This suggests that there are unbalanced spins between determinants 
-              S2_Mat_Elem = Zero
+              S2_Mat_Element_NEW = Zero
             EndIf
           EndIf
-!          Write(IOut,*) 'S2_Mat_Elem:',S2_Mat_Elem
+!          Write(IOut,*) 'S2_Mat_Element_NEW:',S2_Mat_Element_NEW
 
           Return
 
@@ -694,9 +694,9 @@
 !          Write(IOut,*)'Spin 1:',Spin(1),' Spin 2:',Spin(2)
 !          Write(IOut,*)'Det 1:',Det(1),' Det 2:',Det(2)
 !
-          S2_Mat_Elem = Zero 
+          S2_Mat_Element_NEW = Zero 
           If(Spin(1).ne.Spin(2)) then
-            S2_Mat_Elem = Zero
+            S2_Mat_Element_NEW = Zero
 !
           ElseIf(Spin(1).eq.0) then
 !
@@ -727,14 +727,14 @@
               I = NBit_Ints - IPos/Bit_Size(0)
               J = Mod(IPos,Bit_Size(0)) 
               If(BTest(Beta_String_1(I),J).eq..True.) then
-                S2_Mat_Elem = S2_Mat_Elem + MO_Overlap(IPos+1+NBasis,Orbs(1)) * MO_Overlap(Orbs(2),IPos+1+NBasis)
+                S2_Mat_Element_NEW = S2_Mat_Element_NEW + MO_Overlap(IPos+1+NBasis,Orbs(1)) * MO_Overlap(Orbs(2),IPos+1+NBasis)
               EndIf
             EndDo
-!            S2_Mat_Elem = - S2_Mat_Elem
+!            S2_Mat_Element_NEW = - S2_Mat_Element_NEW
 !            Write(IOut,*) 'Permutations:',(2*NAlpha+1-IOcc-JOcc)
 !            Write(IOut,*) 'Mat_Sign:',(-1)**(2*NAlpha+1-IOcc-JOcc)
-            S2_Mat_Elem = (-1)**(2*NAlpha+1-IOcc-JOcc) * S2_Mat_Elem
-!            S2_Mat_Elem = (-1)**(IOcc+JOcc-1) * S2_Mat_Elem
+            S2_Mat_Element_NEW = (-1)**(2*NAlpha+1-IOcc-JOcc) * S2_Mat_Element_NEW
+!            S2_Mat_Element_NEW = (-1)**(IOcc+JOcc-1) * S2_Mat_Element_NEW
 !
           ElseIf(Spin(1).eq.1) then
 
@@ -765,18 +765,18 @@
               I = NBit_Ints - IPos/Bit_Size(0)
               J = Mod(IPos,Bit_Size(0)) 
               If(BTest(Alpha_String_1(I),J).eq..True.) then
-                S2_Mat_Elem = S2_Mat_Elem + MO_Overlap(IPos+1,Orbs(1)+NBasis) * MO_Overlap(Orbs(2)+NBasis,IPos+1)
+                S2_Mat_Element_NEW = S2_Mat_Element_NEW + MO_Overlap(IPos+1,Orbs(1)+NBasis) * MO_Overlap(Orbs(2)+NBasis,IPos+1)
               EndIf
             EndDo
-!            S2_Mat_Elem = - S2_Mat_Elem
+!            S2_Mat_Element_NEW = - S2_Mat_Element_NEW
 !            Write(IOut,*) 'Permutations:',(2*NBeta+1-IOcc-JOcc)
 !            Write(IOut,*) 'Mat_Sign:',(-1)**(2*NBeta+1-IOcc-JOcc)
-            S2_Mat_Elem = (-1)**(2*NBeta+1-IOcc-JOcc) * S2_Mat_Elem
-!            S2_Mat_Elem = (-1)**(IOcc+JOcc-1) * S2_Mat_Elem
+            S2_Mat_Element_NEW = (-1)**(2*NBeta+1-IOcc-JOcc) * S2_Mat_Element_NEW
+!            S2_Mat_Element_NEW = (-1)**(IOcc+JOcc-1) * S2_Mat_Element_NEW
 
           EndIf
 
-!          Write(IOut,*) 'S2_Mat_Elem:',S2_Mat_Elem
+!          Write(IOut,*) 'S2_Mat_Element_NEW:',S2_Mat_Element_NEW
 
           Return
 !
@@ -793,16 +793,15 @@
               EndIf
             EndDo
           EndDo
-          S2_Mat_Elem = Quarter*((NAlpha-NBeta)**2+2*(NAlpha+NBeta)) - ABTerm
-!          Write(IOut,*) 'S2_Mat_Elem:',S2_Mat_Elem
+          S2_Mat_Element_NEW = Quarter*((NAlpha-NBeta)**2+2*(NAlpha+NBeta)) - ABTerm
+!          Write(IOut,*) 'S2_Mat_Element_NEW:',S2_Mat_Element_NEW
 !
           Return
 !
       End Select
 !
-      End Function S2_Mat_Elem  
+      End Function S2_Mat_Element_NEW  
 
-      
 !
 !
-      end module hphSpinFun_mod
+      end module spinprojection_mod

@@ -1,22 +1,23 @@
-INCLUDE 'hphSpinFun_mod.f03'
-      Program spinContaminationChecker
+INCLUDE 'mqc_binary.F03'
+INCLUDE 'spinprojection_mod.f03'
+      program spinProjection
 !
-!     This program evaluates the full set of S^2 eigenvalues and eigenvectors in
-!     the basis of substituted (Sz conserving) determinants. The program reads a
-!     matrix element file generated from a Gaussian unrestricted HF or DFT
-!     calculation.
+!     This program carries out spin projection on an unrestricted Hartree-Fock
+!     (or KS DFT) determinant. The program reads a matrix element file generated
+!     from a Gaussian unrestricted HF or DFT calculation.
 !
 !     This code is based on a previous program written by Hratchian and relies
 !     on S2 matrix element code originally written by Lee Thompson.
 !
 !
-!     -H. P. Hratchian, 2021.
+!     -H. P. Hratchian, 2023.
 !
 !
 !     USE Connections
 !
-      use hphSpinFun_mod
-      USE OMP_LIB
+      use MQC_Binary
+      use spinprojection_mod
+      use OMP_LIB
 !
 !     Variable Declarations
 !
@@ -54,7 +55,7 @@ INCLUDE 'hphSpinFun_mod.f03'
 !
 !     Format Statements
 !
- 1000 Format(1x,'Enter Test Program scfEnergyTerms.')
+ 1000 Format(1x,'Enter Program spinProject.')
  1010 Format(3x,'Matrix File: ',A)
  1020 Format(3x,'Print Level: ',I2)
  1030 Format(3x,'Number OMPs: ',I3,/)
@@ -100,15 +101,6 @@ INCLUDE 'hphSpinFun_mod.f03'
       call mqc_print(iOut,permuteBeta,header='Beta Permutations')
 !hph-
 
-!hph+
-!      call get_command_argument(1,tmpString)
-!      if(TRIM(tmpString).eq.'-g') then
-!        gaussianCall = .true.
-!      else
-!        gaussianCall = .false.
-!      endIf
-!hph-
-
       if(gaussianCall) then
         call commandLineArgs_gaussian(iOut,matrixFilename,iPrint,nOMP)
       else
@@ -126,6 +118,9 @@ INCLUDE 'hphSpinFun_mod.f03'
 !      goto 999
 !hph-
 
+!
+!     Initiate OpenMP.
+!
       call omp_set_num_threads(nOMP)
 !
 !     Open the Gaussian matrix file and load the number of atomic centers.
@@ -144,7 +139,6 @@ INCLUDE 'hphSpinFun_mod.f03'
 !     x nBasis matrix.
 !
       nBasis = Int(GMatrixFile%getVal('nbasis'))
-!hph      if(nBasis.gt.60) call mqc_error('NBasis > 60 NYI.')
       Allocate(tmp2NBasisSq(2*nBasis,2*nBasis))
 !
 !     Load up a few matrices from the matrix file.
@@ -393,10 +387,10 @@ INCLUDE 'hphSpinFun_mod.f03'
       do i = 1,NDetAlpha*NDetBeta
 !        do j = 1,NDetAlpha*NDetBeta
         do j = 1,i
-!          S2_Mat(i,j) = S2_Mat_Elem(IOut,2,nBasis,  &
+!          S2_Mat(i,j) = S2_Mat_Element_NEW(IOut,2,nBasis,  &
 !            stringLeftAlpha(i,1,:),stringLeftBeta(i,1,:),  &
 !            stringRightAlpha(1,j,:),stringRightBeta(1,j,:),tmp2NBasisSq,1_int64)
-          S2_Mat(i,j) = S2_Mat_Elem(IOut,2,nBasis,  &
+          S2_Mat(i,j) = S2_Mat_Element_NEW(IOut,2,nBasis,  &
             stringLeftAlpha(i,1,:),stringLeftBeta(i,1,:),  &
             stringRightAlpha(1,j,:),stringRightBeta(1,j,:),tmp2NBasisSq)
           if(ABS(S2_Mat(i,j)).lt.(float(1)/float(10000))) S2_Mat(i,j) = float(0)
@@ -470,4 +464,4 @@ INCLUDE 'hphSpinFun_mod.f03'
       write(iOut,8999)
       call cpu_time(t2)
       write(iOut,5000) 'TOTAL JOB',t2-t1
-      end program spinContaminationChecker
+      end program spinProjection

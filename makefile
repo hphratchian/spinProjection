@@ -30,5 +30,5 @@ all: spinProjection.exe
 # Generic rule for building general executable program (*.exe) from a standard
 # f03 source (*.f03) file.
 #
-%.exe: %.f03 spinprojection_mod.f03 $(MQCLIB)/libmqc.a
+%.exe: %.f03 spinprojection_mod.f03 mqc_binary.F03 $(MQCLIB)/libmqc.a
 	$(RunF) $(LIBS) $(Prof) -I$(MQCMODS) -o $*.exe $*.f03 $(MQCLIB)/libmqc.a
