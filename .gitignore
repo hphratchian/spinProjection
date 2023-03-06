@@ -30,8 +30,10 @@
 *.exe
 *.app
 
-# Gaussian files
+# Gaussian and SLURM files
 *.log
 *.chk
 *.rwf
 *.mat
+*.qlog
+*.sbatch
