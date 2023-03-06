@@ -11,7 +11,7 @@
 !
 !     mqc_bits
       type :: mqc_bits
-        integer(kind=int64)::nBitsPerInteger=3
+        integer(kind=int64)::nBitsPerInteger=30
         integer(kind=int64)::nBits,nIntegers
         integer(kind=int64),dimension(:),allocatable::integerList
       end type mqc_bits
@@ -127,7 +127,7 @@
 !
 !     Set up the format string.
 !
-      charTemp = num2char(mqc_bits_in%nBitsPerInteger)
+      charTemp = num2char(min(mqc_bits_in%nBitsPerInteger,mqc_bits_in%nBits))
       if(my_verbose) then
         if(PRESENT(Header)) then
           write(my_iUnit,1100) TRIM(Header)

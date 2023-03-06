@@ -23,8 +23,9 @@ INCLUDE 'spinprojection_mod.f03'
 !
       implicit none
       integer(kind=int64)::nCommands,nSwitches,iPrint,nOMP,i,j,k,k1,k2,  &
-        nAtoms,nAt3,nBasis,nDetAlpha,nDetBeta,nDetTotal,NDetTT,  &
-        nBit_Ints,iAlpha,iBeta,jAlpha,jBeta,nFrozenCore,nFrozenVirtual
+        nAtoms,nAt3,nBasis,NovAlphaAlpha,NovBetaBeta,nDetAlpha,nDetBeta,  &
+        nDetTotal,NDetTT,nBit_Ints,iAlpha,iBeta,jAlpha,jBeta,nFrozenCore,  &
+        nFrozenVirtual
       integer(kind=int64),dimension(:),allocatable::atomicNumbers,  &
         tmpVectorInt1,tmpVectorInt2,tmpVectorInt3,tmpVectorInt4
       integer(kind=int64),dimension(:,:),allocatable::permuteAlpha,  &
@@ -51,7 +52,10 @@ INCLUDE 'spinprojection_mod.f03'
         PMatrixBeta,PMatrixTotal,ERIs,JMatrix,KMatrixAlpha,  &
         CAlpha,CBeta
       type(MQC_R4Tensor)::tmpR4
-      Type(MQC_Determinant)::Determinants
+      type(MQC_Determinant)::Determinants
+      type(mqc_bits)::detStringReference_Alpha,detStringReference_Beta
+      type(mqc_bits),dimension(:),allocatable::detStringSingles_AlphaAlpha,  &
+        detStringSingles_BetaBeta
 !
 !     Format Statements
 !
@@ -272,6 +276,11 @@ INCLUDE 'spinprojection_mod.f03'
       scfEnergy = scfEnergy + MQC(Vnn)
       call scfEnergy%print(IOut,' Total SCF Energy = ')
       call flush(iOut)
+
+!hph+
+!      goto 999
+!hph-
+
 !
 !     Build the alpha/beta MO overlap matrix and print it out.
 !
@@ -321,9 +330,60 @@ INCLUDE 'spinprojection_mod.f03'
       write(iOut,*)' nBit_Ints = ',nBit_Ints
       write(iOut,*)
       call flush(iOut)
+!
+!     Build the different sets of determinant strings.
+!
+      detStringReference_Alpha = mqc_bits(nBasis)
+      detStringReference_Beta  = mqc_bits(nBasis)
+      do i = 0,INT(nEalpha)-1
+        call MQC_IBitSet(detStringReference_Alpha,i)
+      endDo
+      do i = 0,INT(nEbeta)-1
+        call MQC_IBitSet(detStringReference_Beta,i)
+      endDo
+      call MQC_Bits_Print(detStringReference_Alpha,header='Alpha reference determinant string:')
+      call MQC_Bits_Print(detStringReference_Beta,header='Beta  reference determinant string:')
+      NovAlphaAlpha = INT(nEalpha)*(nBasis-INT(nEalpha))
+      NovBetaBeta   = INT(nEbeta)*(nBasis-INT(nEbeta))
+      Allocate(detStringSingles_AlphaAlpha(NovAlphaAlpha))
+      k = 0
+      do i = 0,INT(nEalpha)-1
+        do j = INT(nEalpha),nBasis-1
+          k = k+1
+          detStringSingles_AlphaAlpha(k) = mqc_bits(nBasis)
+          detStringSingles_AlphaAlpha(k) = detStringReference_Alpha
+          call MQC_IBitClr(detStringSingles_AlphaAlpha(k),i)
+          call MQC_IBitSet(detStringSingles_AlphaAlpha(k),j)
+        endDo
+      endDo
+      do i = 1,NovAlphaAlpha
+        call MQC_Bits_Print(detStringSingles_AlphaAlpha(i),header='singles alpha/alpha (i):')
+      endDo
+      Allocate(detStringSingles_BetaBeta(NovBetaBeta))
+      k = 0
+      do i = 0,INT(nEbeta)-1
+        do j = INT(nEbeta),nBasis-1
+          k = k+1
+          detStringSingles_BetaBeta(k) = mqc_bits(nBasis)
+          detStringSingles_BetaBeta(k) = detStringReference_Beta
+          call MQC_IBitClr(detStringSingles_BetaBeta(k),i)
+          call MQC_IBitSet(detStringSingles_BetaBeta(k),j)
+        endDo
+      endDo
+      do i = 1,NovBetaBeta
+        call MQC_Bits_Print(detStringSingles_BetaBeta(i),header='singles beta/beta (i)  :')
+      endDo
+
+
+      write(*,*)
+      write(*,*)
+      write(*,*)' Hrant - nBits     = ',detStringReference_Beta%nBits
+      write(*,*)' Hrant - nIntegers = ',detStringReference_Beta%nIntegers
+      write(*,*)
+      write(*,*)
 
 !hph+
-!      goto 999
+      goto 999
 !hph-
 
       Allocate(S2_Mat(nDetTotal,nDetTotal))
