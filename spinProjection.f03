@@ -32,7 +32,7 @@ INCLUDE 'spinprojection_mod.f03'
         permuteBeta
       integer(kind=int64),dimension(:,:,:),allocatable::stringLeftAlpha,  &
         stringLeftBeta,stringRightAlpha,stringRightBeta
-      real(kind=real64)::t1,t2,t1A,t2A,Vnn,Escf
+      real(kind=real64)::t1,t2,t1A,t2A,Vnn,Escf,S2temp
       real(kind=real64),dimension(3)::tmp3Vec
       real(kind=real64),dimension(:),allocatable::cartesians,  &
         S2_MatSymm,tmpEVals,tmpVector
@@ -383,9 +383,13 @@ INCLUDE 'spinprojection_mod.f03'
       write(*,*)
 
 !hph+
-      goto 999
+!      goto 999
 !hph-
 
+!
+!     Build the full MO-MO overlap matrix, which is required by the S^2 matrix
+!     element function we use below.
+!
       Allocate(S2_Mat(nDetTotal,nDetTotal))
       tmp2NBasisSq(1:NBasis,1:NBasis) = float(0)
       tmp2NBasisSq(NBasis+1:2*NBasis,NBasis+1:2*NBasis) = float(0)
@@ -398,6 +402,32 @@ INCLUDE 'spinprojection_mod.f03'
       if(iPrint.ge.0.or.DEBUG)  &
         call mqc_print(iOut,tmp2NBasisSq,header='Full MO-MO Overlap')
       call flush(iOut)
+
+!hph+
+!      goto 999
+!hph-
+
+!
+!     Now, call the matrix element function for all of the diagonal terms and
+!     print the results.
+!
+      write(*,*)
+      write(*,*)
+      write(*,*)' Calculate <S^2>'
+      call MQC_Bits_Print(detStringReference_Alpha,header='ref determinant alpha:')
+      call MQC_Bits_Print(detStringReference_Beta,header='ref determinant beta :')
+      S2temp = S2_Mat_Element_NEW(IOut,2,nBasis,  &
+        detStringReference_Alpha%integerList,detStringReference_Beta%integerList,  &
+        detStringReference_Alpha%integerList,detStringReference_Beta%integerList,  &
+        tmp2NBasisSq)
+      if(ABS(S2temp).lt.(float(1)/float(10000))) S2temp = float(0)
+      write(*,*)' <S^2> = ',S2temp
+
+!hph+
+      goto 999
+!hph-
+
+
 !
 !     Pre-process the string list combinations for the S2 matrix element
 !     formation loops below.
